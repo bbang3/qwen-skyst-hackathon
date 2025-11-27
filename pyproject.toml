@@ -1,0 +1,23 @@
+[project]
+name = "x402-hackathon"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "cdp-sdk>=1.33.3",
+    "fastapi>=0.122.0",
+    "flask>=3.1.2",
+    "openai>=2.8.1",
+    "openai-agents>=0.0.6,<0.0.7",
+    "pipx>=1.8.0",
+    "python-dotenv>=1.2.1",
+    "requests>=2.31.0",
+    "x402>=0.2.1",
+    "coinbase-agentkit",
+    "coinbase-agentkit-openai-agents-sdk",
+    "ddgs>=9.9.1",
+    "presidio-analyzer>=2.2.0",
+    "presidio-anonymizer>=2.2.0",
+    "streamlit>=1.28.0",
+]
