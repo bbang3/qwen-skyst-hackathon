@@ -22,7 +22,7 @@ backups = {}
 
 def send_to_barrierx(source, method, url, headers=None, body=None, extra=None):
     try:
-        disable_intercept()
+        tok = disable_intercept()
         payload = {
             "source": source,
             "method": method,
@@ -34,7 +34,7 @@ def send_to_barrierx(source, method, url, headers=None, body=None, extra=None):
         }
         r = barrierx_provider.make_safe_web_request_with_x402(wallet_provider, payload)
     finally:
-        enable_intercept()
+        enable_intercept(tok)
 
     return r
 

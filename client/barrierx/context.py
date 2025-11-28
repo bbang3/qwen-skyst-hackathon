@@ -31,17 +31,13 @@ barrierx_provider = BarrierXActionProvider()
 _local = threading.local()
 _local.disable_intercept = False
 
-
 disable_intercept_var = ContextVar("disable_intercept", default=False)
-
 
 def is_intercept_disabled():
     return disable_intercept_var.get()
 
-
 def disable_intercept():
-    disable_intercept_var.set(True)
+    return disable_intercept_var.set(True)
 
-
-def enable_intercept():
-    disable_intercept_var.set(False)
+def enable_intercept(token):
+    disable_intercept_var.reset(token)

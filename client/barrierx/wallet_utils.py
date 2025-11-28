@@ -329,9 +329,6 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
 
             # Send to proxy server with auto-payment flag
             # The proxy server will handle payment automatically if needed
-            # import pdb
-
-            # pdb.set_trace()
 
             payment_info = {"auto_payment": True}
             proxy_response = self._send_to_proxy(

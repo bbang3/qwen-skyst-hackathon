@@ -53,8 +53,5 @@ def web_tool(
     Returns:
         str: Formatted string containing the response status, headers, and data
     """
-    import pdb
-
-    pdb.set_trace()
 
     return make_http_request(url, method, headers, body)
