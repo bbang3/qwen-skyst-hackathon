@@ -15,15 +15,14 @@ import streamlit as st
 from agents.items import ItemHelpers
 from agents.run import Runner
 from dotenv import load_dotenv
+from setup import setup
 
 # Add parent directory to path to import chatbot module
 current_dir = Path(__file__).parent
 parent_dir = current_dir.parent
 sys.path.insert(0, str(parent_dir))
 
-from client.chatbot import setup
 from client.debug_utils import print_debug_info
-
 
 # Load environment variables
 load_dotenv()
@@ -121,7 +120,7 @@ if prompt:
 
     # Get agent response
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
+        with st.spinner("Running..."):
             try:
                 # Run agent asynchronously
                 output = asyncio.run(Runner.run(st.session_state.agent, input_data))
