@@ -36,12 +36,30 @@ def barrierx(func):
 if __name__ == "__main__":
     @barrierx
     def run():
-        print("Sending via requests")
-        r = requests.get("https://example.com")
-        print("Returned:", r.status_code, r.text[:50])
+        import requests
 
-        print("Sending via httpx")
-        r2 = httpx.get("https://httpbin.org/get")
-        print("Returned:", r2.status_code, r2.text[:50])
+        url = "https://api.duckduckgo.com/"
+
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "BarrierX-Demo/1.0"
+        }
+
+        body = {
+            "q": "python decorator example",
+            "format": "json",
+            "no_html": 1,
+            "skip_disambig": 1
+        }
+
+        r = requests.post(url, headers=headers, json=body)
+
+        print("Status:", r.status_code)
+        print("Response:", r.text[:500])
+
+        # print("Sending via httpx")
+        # r2 = httpx.get("https://httpbin.org/get")
+        # print("Returned:", r2.status_code, r2.text[:50])
         
     run()
