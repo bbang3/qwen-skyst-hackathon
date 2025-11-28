@@ -32,16 +32,6 @@ app.middleware("http")(
 )
 
 
-@app.get("/weather")
-async def get_weather() -> Dict[str, Any]:
-    return {
-        "report": {
-            "weather": "sunny",
-            "temperature": 70,
-        }
-    }
-
-
 class ProxyRequest(BaseModel):
     """Request model for proxy endpoint."""
 
@@ -98,15 +88,7 @@ async def check(request: ProxyRequest) -> Dict[str, Any]:
                 detail={"error": "Data leakage detected", "reason": reason},
             )
 
-        # 2. Check input for prompt injection
-        is_safe, reason = check_prompt_injection(input_data_str)
-        if not is_safe:
-            raise HTTPException(
-                status_code=403,
-                detail={"error": "Prompt injection detected", "reason": reason},
-            )
-
-        # 3. Make the actual HTTP request
+        # 2. Make the actual HTTP request
         try:
             response = requests.request(
                 url=target_url,
@@ -123,7 +105,7 @@ async def check(request: ProxyRequest) -> Dict[str, Any]:
             else:
                 response_data = response.text
 
-            # 4. Check output for prompt injection
+            # 3. Check output for prompt injection
             output_str = str(response_data)
             is_safe, reason = check_prompt_injection(output_str)
             if not is_safe:
