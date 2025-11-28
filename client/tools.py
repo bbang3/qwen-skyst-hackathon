@@ -1,4 +1,5 @@
 import os
+from typing import Any, Dict
 
 import requests
 from agents import function_tool
@@ -7,62 +8,56 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Get search proxy server URL from environment
-SEARCH_PROXY_URL = os.getenv("SEARCH_PROXY_URL", "http://localhost:4021/search")
-
 
 @function_tool
-def get_today_fortune(birth_animal: str) -> str:
-    """Get today's fortune based on birth animal (zodiac sign).
+def make_http_request(
+    url: str,
+    method: str = "GET",
+    headers: Dict[str, str] | None = None,
+    body: str | None = None,
+) -> str:
+    """Make a simple HTTP request.
+
+    This tool performs the same HTTP request functionality as the /check endpoint
+    in server/main.py but without any security validation (data leakage or
+    prompt injection checks). Use this to compare behavior with the secure proxy.
 
     Args:
-        birth_animal (str): Birth animal (e.g., "쥐", "소", "호랑이", ...)
-    """
-    return f"{birth_animal}띠의 오늘의 운세: 당신은 행운이 가득할 것입니다."
-
-
-@function_tool
-def search_web(query: str, max_results: int = 5) -> str:
-    """Perform web search using DuckDuckGo and return formatted results.
-
-    Args:
-        query (str): Search keywords or question
-        max_results (int): Maximum number of results to return (default: 5)
+        url (str): The target URL to send the request to
+        method (str): HTTP method (GET, POST, PUT, DELETE, etc.). Defaults to "GET"
+        headers (dict, optional): HTTP headers to include in the request
+        body (any, optional): Request body. If dict, sent as JSON; otherwise as form data
 
     Returns:
-        str: Formatted string containing search results
+        str: Formatted string containing the response status, headers, and data
     """
     try:
-        # Send POST request to proxy server
-        response = requests.post(
-            SEARCH_PROXY_URL,
-            json={"query": query, "max_results": max_results},
+        # Make the HTTP request
+        response = requests.request(
+            url=url,
+            method=method,
+            headers=headers,
+            data=body,
             timeout=30,
         )
 
-        # Check if request was successful
-        if response.status_code == 400:
-            return f"Search request rejected: {response.json().get('detail', 'Malicious prompt detected')}"
+        # Get response content
+        if "application/json" in response.headers.get("content-type", ""):
+            try:
+                response_data = response.json()
+            except ValueError:
+                response_data = response.text
+        else:
+            response_data = response.text
 
-        response.raise_for_status()
+        # Format response for display
+        result = f"Status Code: {response.status_code}\n"
+        result += f"Headers: {dict(response.headers)}\n"
+        result += f"\nResponse Data:\n{response_data}"
 
-        # Parse response
-        data = response.json()
-        results = data.get("results", [])
+        return result
 
-        if not results:
-            return f"'{query}' search results not found."
-
-        formatted_results = []
-        for i, result in enumerate(results, 1):
-            title = result.get("title", "No title")
-            snippet = result.get("body", "No description")
-            url = result.get("href", "")
-            formatted_results.append(f"{i}. {title}\n   {snippet}\n   {url}")
-            print(snippet)
-
-        return f"'{query}' search results:\n\n" + "\n\n".join(formatted_results)
     except requests.exceptions.RequestException as e:
-        return f"An error occurred while searching: {str(e)}"
+        return f"Error making HTTP request: {str(e)}"
     except Exception as e:
-        return f"An error occurred while searching: {str(e)}"
+        return f"Unexpected error: {str(e)}"
