@@ -10,7 +10,6 @@ from coinbase_agentkit import (
     wallet_action_provider,
 )
 from coinbase_agentkit_openai_agents_sdk import get_openai_agents_sdk_tools
-from barrierx_action_provider import barrierx_action_provider
 from tools import web_tool
 
 
