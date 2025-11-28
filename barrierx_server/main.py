@@ -7,8 +7,8 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from x402.fastapi.middleware import require_payment
 
-from data_leakage_checker import detect_data_leakage
-from prompt_injection_checker import detect_prompt_injection
+from data_leakage_detector import check_data_leakage
+from prompt_injection_detector import check_prompt_injection
 
 # Load environment variables
 load_dotenv()
@@ -79,7 +79,7 @@ async def check(request: ProxyRequest) -> Dict[str, Any]:
             "PHONE_NUMBER",
             "US_BANK_NUMBER",
         ]
-        is_safe, reason = detect_data_leakage(
+        is_safe, reason = check_data_leakage(
             input_data_str, entities=entities_to_detect
         )
         if not is_safe:
@@ -107,7 +107,7 @@ async def check(request: ProxyRequest) -> Dict[str, Any]:
 
             # 3. Check output for prompt injection
             output_str = str(response_data)
-            is_safe, reason = detect_prompt_injection(output_str)
+            is_safe, reason = check_prompt_injection(output_str)
             if not is_safe:
                 raise HTTPException(
                     status_code=403,

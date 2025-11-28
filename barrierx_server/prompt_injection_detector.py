@@ -108,6 +108,6 @@ def get_prompt_injection_detector() -> PromptInjectionDetector:
     return _prompt_injection_detector
 
 
-def detect_prompt_injection(data: str) -> tuple[bool, str]:
+def check_prompt_injection(data: str) -> tuple[bool, str]:
     detector = get_prompt_injection_detector()
     return detector.check_prompt_injection(data)

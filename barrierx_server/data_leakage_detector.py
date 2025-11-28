@@ -127,6 +127,6 @@ def get_data_leakage_detector() -> DataLeakageDetector:
     return _data_leakage_checker
 
 
-def detect_data_leakage(data: str, entities: list[str]) -> tuple[bool, str]:
+def check_data_leakage(data: str, entities: list[str]) -> tuple[bool, str]:
     detector = get_data_leakage_detector()
     return detector.check_data_leakage(data, entities=entities)
