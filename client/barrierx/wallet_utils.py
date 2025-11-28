@@ -14,9 +14,9 @@ from coinbase_agentkit.wallet_providers.evm_wallet_provider import EvmWalletProv
 from x402.clients.requests import x402_requests
 from x402.types import PaymentRequirements
 
-SUPPORTED_NETWORKS = ["base-mainnet", "base-sepolia"]
-
 from .constants import BARRIERX_PROXY_URL
+
+SUPPORTED_NETWORKS = ["base-mainnet", "base-sepolia"]
 
 
 class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
@@ -153,11 +153,22 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
 
             # Parse proxy server response
             if proxy_response.status_code != 200:
+                # Non-200 from the BarrierX proxy (e.g. 403 prompt injection).
+                # Preserve HTTP status and body so callers can see the original
+                # error details (including the prompt-injection reason).
+                try:
+                    error_body: Any = proxy_response.json()
+                except ValueError:
+                    error_body = proxy_response.text
+
                 return json.dumps(
                     {
-                        "error": True,
-                        "message": f"Proxy server error: {proxy_response.status_code}",
-                        "details": proxy_response.text,
+                        "success": False,
+                        "url": args.get("url", "error"),
+                        "method": args.get("method", "GET"),
+                        "status": proxy_response.status_code,
+                        "data": error_body,
+                        "headers": dict(proxy_response.headers),
                     },
                     indent=2,
                 )
@@ -246,11 +257,19 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
             )
 
             if proxy_response.status_code != 200:
+                try:
+                    error_body: Any = proxy_response.json()
+                except ValueError:
+                    error_body = proxy_response.text
+
                 return json.dumps(
                     {
-                        "error": True,
-                        "message": f"Proxy server error: {proxy_response.status_code}",
-                        "details": proxy_response.text,
+                        "success": False,
+                        "url": args.get("url", "error"),
+                        "method": args.get("method", "GET"),
+                        "status": proxy_response.status_code,
+                        "data": error_body,
+                        "headers": dict(proxy_response.headers),
                     },
                     indent=2,
                 )
@@ -336,11 +355,19 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
             )
 
             if proxy_response.status_code != 200:
+                try:
+                    error_body: Any = proxy_response.json()
+                except ValueError:
+                    error_body = proxy_response.text
+
                 return json.dumps(
                     {
-                        "error": True,
-                        "message": f"Proxy server error: {proxy_response.status_code}",
-                        "details": proxy_response.text,
+                        "success": False,
+                        "url": args.get("url", "error"),
+                        "method": args.get("method", "GET"),
+                        "status": proxy_response.status_code,
+                        "data": error_body,
+                        "headers": dict(proxy_response.headers),
                     },
                     indent=2,
                 )
@@ -381,10 +408,10 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
             )()
             return json.dumps(
                 {
-                    "error": True,
-                    "message": f"HTTP {error.response.status_code} error when accessing {url}",
-                    "details": error_details.get("error", str(error)),
-                    "suggestion": "Check if the URL is correct and the API is available.",
+                    "success": False,
+                    "status": getattr(error.response, "status_code", 500),
+                    "data": error_details,
+                    "url": url,
                 },
                 indent=2,
             )
@@ -392,20 +419,26 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
         if hasattr(error, "request") and error.request is not None:
             return json.dumps(
                 {
-                    "error": True,
-                    "message": f"Network error when accessing {url}",
-                    "details": str(error),
-                    "suggestion": "Check your internet connection and verify the API endpoint is accessible.",
+                    "success": False,
+                    "status": 500,
+                    "data": {
+                        "error": str(error),
+                        "type": "network_error",
+                    },
+                    "url": url,
                 },
                 indent=2,
             )
 
         return json.dumps(
             {
-                "error": True,
-                "message": f"Error making request to {url}",
-                "details": str(error),
-                "suggestion": "Please check the request parameters and try again.",
+                "success": False,
+                "status": 500,
+                "data": {
+                    "error": str(error),
+                    "type": "unknown_error",
+                },
+                "url": url,
             },
             indent=2,
         )

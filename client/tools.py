@@ -13,7 +13,7 @@ load_dotenv()
 from barrierx.client import barrierx
 
 
-@barrierx
+# @barrierx
 def make_http_request(
     url: str,
     method: str = "GET",
@@ -42,7 +42,7 @@ def web_tool(
     headers: Dict[str, str] | None = None,
     body: str | None = None,
 ) -> str:
-    """Make a simple HTTP request.
+    """Make a simple HTTP request. This tool is used to make HTTP requests to the target URL.
 
     Args:
         url (str): The target URL to send the request to
@@ -51,7 +51,7 @@ def web_tool(
         body (any, optional): Request body. If dict, sent as JSON; otherwise as form data
 
     Returns:
-        str: Formatted string containing the response status, headers, and data
+        str: Formatted string containing the response status, headers, and data.
     """
 
     return make_http_request(url, method, headers, body)

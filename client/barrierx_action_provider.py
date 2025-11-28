@@ -21,7 +21,7 @@ SUPPORTED_NETWORKS = ["base-mainnet", "base-sepolia"]
 
 # Proxy server endpoint for safe HTTP requests
 # This endpoint receives HTTP request payloads and processes them safely
-PROXY_SERVER_ENDPOINT = "http://localhost:4021/check"
+PROXY_SERVER_ENDPOINT = "http://0.0.0.0:4021/check"
 
 
 class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
@@ -122,7 +122,7 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
             headers={"Content-Type": "application/json"},
             data=body_data,
         )
-        print(f"BarrierX Action Provider Response: {response.text}")
+        print(f"BarrierX Action Provider Response: {response}")
         return response
 
     @create_action(
@@ -161,9 +161,8 @@ If you receive a 402 Payment Required response, use retry_safe_web_request_with_
             if proxy_response.status_code != 200:
                 return json.dumps(
                     {
-                        "error": True,
-                        "message": f"Proxy server error: {proxy_response.status_code}",
-                        "details": proxy_response.text,
+                        "status": proxy_response.status_code,
+                        "data": proxy_response.json(),
                     },
                     indent=2,
                 )

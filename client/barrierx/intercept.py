@@ -82,11 +82,30 @@ def intercept_requests(self, method, url, **kwargs):
         )
     )
 
+    # Expect BarrierXActionProvider to return at least:
+    # - status: HTTP status code
+    # - data: response body (str / bytes / JSON-serialisable)
+    if "status" not in resp or "data" not in resp:
+        # Fallback: synthesise a 500 response that surfaces the raw payload
+        r = requests.Response()
+        r.status_code = 500
+        r._content = json.dumps(resp).encode("utf-8")
+        r.headers = {}
+        r.url = url
+        return r
+
+    body = resp["data"]
+    if isinstance(body, bytes):
+        content = body
+    elif isinstance(body, str):
+        content = body.encode("utf-8")
+    else:
+        # dict / list / other JSON-serialisable → JSON bytes
+        content = json.dumps(body).encode("utf-8")
+
     r = requests.Response()
     r.status_code = resp["status"]
-    r._content = (
-        resp["data"].encode() if isinstance(resp["data"], str) else resp["data"]
-    )
+    r._content = content
     r.headers = resp.get("headers", {})
     r.url = url
     return r
@@ -110,9 +129,15 @@ def intercept_urllib(req, *args, **kwargs):
         )
     )
 
-    return BytesIO(
-        resp["data"].encode() if isinstance(resp["data"], str) else resp["data"]
-    )
+    data = resp["data"]
+    if isinstance(data, bytes):
+        content = data
+    elif isinstance(data, str):
+        content = data.encode("utf-8")
+    else:
+        content = json.dumps(data).encode("utf-8")
+
+    return BytesIO(content)
 
 
 def intercept_urllib3_http(self, method, url, **kwargs):
@@ -128,10 +153,16 @@ def intercept_urllib3_http(self, method, url, **kwargs):
         )
     )
 
+    data = resp["data"]
+    if isinstance(data, bytes):
+        content = data
+    elif isinstance(data, str):
+        content = data.encode("utf-8")
+    else:
+        content = json.dumps(data).encode("utf-8")
+
     fake_resp = urllib3.response.HTTPResponse(
-        body=BytesIO(
-            resp["data"].encode() if isinstance(resp["data"], str) else resp["data"]
-        ),
+        body=BytesIO(content),
         status=resp["status"],
         headers=resp.get("headers"),
         preload_content=False,
@@ -165,9 +196,13 @@ def intercept_httpclient_getresponse(self):
     fake.msg = message
     fake.reason = ""
     fake.chunked = False
-    body_bytes = (
-        resp["data"].encode() if isinstance(resp["data"], str) else resp["data"]
-    )
+    data = resp["data"]
+    if isinstance(data, bytes):
+        body_bytes = data
+    elif isinstance(data, str):
+        body_bytes = data.encode("utf-8")
+    else:
+        body_bytes = json.dumps(data).encode("utf-8")
     fake.fp = BytesIO(body_bytes)
     fake.length = len(body_bytes)
     return fake
@@ -218,11 +253,13 @@ class FakeAiohttpResponse:
     def __init__(self, barrier_resp, url):
         self.status = barrier_resp["status"]
         self.headers = barrier_resp.get("headers", {})
-        self._body = (
-            barrier_resp["data"].encode()
-            if isinstance(barrier_resp["data"], str)
-            else barrier_resp["data"]
-        )
+        data = barrier_resp["data"]
+        if isinstance(data, bytes):
+            self._body = data
+        elif isinstance(data, str):
+            self._body = data.encode("utf-8")
+        else:
+            self._body = json.dumps(data).encode("utf-8")
         self.reason = ""
         self.url = url
 

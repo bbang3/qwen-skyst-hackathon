@@ -1,8 +1,3 @@
-"""Prompt injection checker module for detecting prompt injection attempts.
-
-This module uses OpenAI API to classify whether text contains prompt injection attempts.
-"""
-
 import json
 import os
 
@@ -13,15 +8,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class PromptInjectionChecker:
-    """Checker for detecting prompt injection attempts using LLM classification."""
+class PromptInjectionDetector:
+    """Detector for detecting prompt injection attempts using LLM classification."""
 
     def __init__(self):
-        """Initialize the prompt injection checker with OpenAI client."""
+        """Initialize the prompt injection detector with OpenAI client."""
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             print(
-                "Warning: OPENAI_API_KEY not found. Prompt injection checking will be disabled."
+                "Warning: OPENAI_API_KEY not found. Prompt injection detection will be disabled."
             )
             self.client = None
         else:
@@ -38,7 +33,7 @@ class PromptInjectionChecker:
         """
         if not self.client:
             # If OpenAI client is not available, fall back to safe (allow)
-            return True, ""
+            return False, "OpenAI client not available"
 
         # Truncate data if too long to avoid token limits
         max_length = 8000
@@ -102,31 +97,17 @@ A prompt injection is an attempt to manipulate an AI system by:
 
 
 # Global instance
-_prompt_injection_checker = None
+_prompt_injection_detector = None
 
 
-def get_prompt_injection_checker() -> PromptInjectionChecker:
-    """Get or create the global PromptInjectionChecker instance.
+def get_prompt_injection_detector() -> PromptInjectionDetector:
 
-    Returns:
-        PromptInjectionChecker: The prompt injection checker instance.
-    """
-    global _prompt_injection_checker
-    if _prompt_injection_checker is None:
-        _prompt_injection_checker = PromptInjectionChecker()
-    return _prompt_injection_checker
+    global _prompt_injection_detector
+    if _prompt_injection_detector is None:
+        _prompt_injection_detector = PromptInjectionDetector()
+    return _prompt_injection_detector
 
 
-def check_prompt_injection(data: str) -> tuple[bool, str]:
-    """Check if the data contains prompt injection attempts.
-
-    Convenience function that uses the global PromptInjectionChecker instance.
-
-    Args:
-        data: The data string to check.
-
-    Returns:
-        tuple[bool, str]: (is_safe, reason) - True if safe, False with reason if unsafe.
-    """
-    checker = get_prompt_injection_checker()
-    return checker.check_prompt_injection(data)
+def detect_prompt_injection(data: str) -> tuple[bool, str]:
+    detector = get_prompt_injection_detector()
+    return detector.check_prompt_injection(data)

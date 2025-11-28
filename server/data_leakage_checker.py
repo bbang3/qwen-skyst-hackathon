@@ -1,19 +1,11 @@
-"""Data leakage checker module for detecting sensitive information.
-
-This module provides:
-1. Regex-based detection for sensitive patterns (API keys, passwords, tokens, etc.)
-2. Presidio Analyzer-based PII detection (CRYPTO, CREDIT_CARD, US_SSN, etc.)
-"""
-
 import re
 from presidio_analyzer import AnalyzerEngine
 
 
-class DataLeakageChecker:
-    """Checker for detecting data leakage and sensitive information."""
+class DataLeakageDetector:
+    """Detector for detecting data leakage and sensitive information."""
 
     def __init__(self):
-        """Initialize the data leakage checker with Presidio Analyzer if available."""
         try:
             self.analyzer = AnalyzerEngine()
         except Exception as e:
@@ -128,29 +120,13 @@ class DataLeakageChecker:
 _data_leakage_checker = None
 
 
-def get_data_leakage_checker() -> DataLeakageChecker:
-    """Get or create the global DataLeakageChecker instance.
-
-    Returns:
-        DataLeakageChecker: The data leakage checker instance.
-    """
+def get_data_leakage_detector() -> DataLeakageDetector:
     global _data_leakage_checker
     if _data_leakage_checker is None:
-        _data_leakage_checker = DataLeakageChecker()
+        _data_leakage_checker = DataLeakageDetector()
     return _data_leakage_checker
 
 
-def check_data_leakage(data: str, entities: list[str]) -> tuple[bool, str]:
-    """Check if the data contains sensitive information.
-
-    Convenience function that uses the global DataLeakageChecker instance.
-
-    Args:
-        data: The data string to check.
-        entities: List of Presidio entity types to detect.
-
-    Returns:
-        tuple[bool, str]: (is_safe, reason) - True if safe, False with reason if unsafe.
-    """
-    checker = get_data_leakage_checker()
-    return checker.check_data_leakage(data, entities=entities)
+def detect_data_leakage(data: str, entities: list[str]) -> tuple[bool, str]:
+    detector = get_data_leakage_detector()
+    return detector.check_data_leakage(data, entities=entities)

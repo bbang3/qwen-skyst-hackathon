@@ -1,6 +1,6 @@
 import os
 
-BARRIERX_BASE_URL = "http://127.0.0.1:8000"
+BARRIERX_BASE_URL = "http://localhost:4021"
 BARRIERX_PROXY_URL = f"{BARRIERX_BASE_URL}/check"
 
 CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID")
