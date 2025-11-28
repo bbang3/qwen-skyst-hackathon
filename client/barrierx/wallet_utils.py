@@ -2,11 +2,6 @@ import json
 from typing import Any
 
 import requests
-from x402.clients.requests import x402_requests
-from x402.types import PaymentRequirements
-
-from coinbase_agentkit.network import Network
-from coinbase_agentkit.wallet_providers.evm_wallet_provider import EvmWalletProvider
 from coinbase_agentkit.action_providers.action_decorator import create_action
 from coinbase_agentkit.action_providers.action_provider import ActionProvider
 from coinbase_agentkit.action_providers.x402.x402_action_provider import (
@@ -14,6 +9,10 @@ from coinbase_agentkit.action_providers.x402.x402_action_provider import (
     HttpRequestSchema,
     RetryWithX402Schema,
 )
+from coinbase_agentkit.network import Network
+from coinbase_agentkit.wallet_providers.evm_wallet_provider import EvmWalletProvider
+from x402.clients.requests import x402_requests
+from x402.types import PaymentRequirements
 
 SUPPORTED_NETWORKS = ["base-mainnet", "base-sepolia"]
 
@@ -29,8 +28,7 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
 
     def __init__(self):
         super().__init__("x402", [])
-        
-        
+
     def _send_to_proxy(
         self,
         wallet_provider: EvmWalletProvider,
@@ -54,7 +52,7 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
             "headers": request_payload.get("headers"),
             "body": request_payload.get("body"),
         }
-            
+
         if payment_info:
             proxy_payload["payment_info"] = payment_info
 
@@ -67,49 +65,50 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
         if payment_info and not payment_info.get("auto_payment"):
             # Create payment selector function for specific payment option
             def payment_selector(
-                    payment_options: list[PaymentRequirements],
-                    network_filter: str | None = None,
-                    scheme_filter: str | None = None,
-                    max_value: int | None = None,
-                ) -> PaymentRequirements:
-                    network = network_filter or payment_info["network"]
-                    scheme = scheme_filter or payment_info["scheme"]
-                    max_amount = max_value or int(payment_info["max_amount_required"])
-                    pay_to = payment_info["pay_to"]
-                    asset = payment_info["asset"]
+                payment_options: list[PaymentRequirements],
+                network_filter: str | None = None,
+                scheme_filter: str | None = None,
+                max_value: int | None = None,
+            ) -> PaymentRequirements:
+                network = network_filter or payment_info["network"]
+                scheme = scheme_filter or payment_info["scheme"]
+                max_amount = max_value or int(payment_info["max_amount_required"])
+                pay_to = payment_info["pay_to"]
+                asset = payment_info["asset"]
 
-                    for req in payment_options:
-                        req_dict = req if isinstance(req, dict) else req.dict()
-                        if (
-                            req_dict["network"] == network
-                            and req_dict["scheme"] == scheme
-                            and req_dict["pay_to"] == pay_to
-                            and req_dict["asset"] == asset
-                            and int(req_dict["max_amount_required"]) <= max_amount
-                        ):
-                            return PaymentRequirements(**req_dict)
+                for req in payment_options:
+                    req_dict = req if isinstance(req, dict) else req.dict()
+                    if (
+                        req_dict["network"] == network
+                        and req_dict["scheme"] == scheme
+                        and req_dict["pay_to"] == pay_to
+                        and req_dict["asset"] == asset
+                        and int(req_dict["max_amount_required"]) <= max_amount
+                    ):
+                        return PaymentRequirements(**req_dict)
 
-                    # Fallback: try matching just network, payTo and asset
-                    for req in payment_options:
-                        req_dict = req if isinstance(req, dict) else req.dict()
-                        if (
-                            req_dict["network"] == network
-                            and req_dict["pay_to"] == pay_to
-                            and req_dict["asset"] == asset
-                            and int(req_dict["max_amount_required"]) <= max_amount
-                        ):
-                            return PaymentRequirements(**req_dict)
+                # Fallback: try matching just network, payTo and asset
+                for req in payment_options:
+                    req_dict = req if isinstance(req, dict) else req.dict()
+                    if (
+                        req_dict["network"] == network
+                        and req_dict["pay_to"] == pay_to
+                        and req_dict["asset"] == asset
+                        and int(req_dict["max_amount_required"]) <= max_amount
+                    ):
+                        return PaymentRequirements(**req_dict)
 
-                    raise ValueError(
-                        "No matching payment requirements found for the selected criteria"
-                    )
+                raise ValueError(
+                    "No matching payment requirements found for the selected criteria"
+                )
+
             session = x402_requests(
                 account, payment_requirements_selector=payment_selector
             )
         else:
             # Auto-payment or no payment info - use default x402_requests
             session = x402_requests(account)
-        
+
         # Make request to proxy server using x402_requests
         response = session.request(
             url=BARRIERX_PROXY_URL,
@@ -330,6 +329,10 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
 
             # Send to proxy server with auto-payment flag
             # The proxy server will handle payment automatically if needed
+            # import pdb
+
+            # pdb.set_trace()
+
             payment_info = {"auto_payment": True}
             proxy_response = self._send_to_proxy(
                 wallet_provider, request_payload, payment_info

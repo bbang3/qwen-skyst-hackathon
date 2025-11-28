@@ -1,22 +1,20 @@
 import threading
+from contextvars import ContextVar
+
 from coinbase_agentkit import (
     CdpEvmWalletProvider,
     CdpEvmWalletProviderConfig,
-)    
+)
 
 from .constants import (
-    BARRIERX_PROXY_URL,
+    BUYER_WALLET_ADDRESS,
     CDP_API_KEY_ID,
     CDP_API_KEY_SECRET,
     CDP_WALLET_SECRET,
-    NETWORK_ID,
-    BUYER_WALLET_ADDRESS,
     IDEMPOTENCY_KEY,
+    NETWORK_ID,
 )
-from .wallet_utils import (
-    BarrierXActionProvider
-)
-
+from .wallet_utils import BarrierXActionProvider
 
 wallet_provider = CdpEvmWalletProvider(
     CdpEvmWalletProviderConfig(
@@ -25,7 +23,7 @@ wallet_provider = CdpEvmWalletProvider(
         wallet_secret=CDP_WALLET_SECRET,
         network_id=NETWORK_ID,
         address=BUYER_WALLET_ADDRESS,
-        idempotency_key=IDEMPOTENCY_KEY
+        idempotency_key=IDEMPOTENCY_KEY,
     )
 )
 barrierx_provider = BarrierXActionProvider()
@@ -33,11 +31,17 @@ barrierx_provider = BarrierXActionProvider()
 _local = threading.local()
 _local.disable_intercept = False
 
+
+disable_intercept_var = ContextVar("disable_intercept", default=False)
+
+
 def is_intercept_disabled():
-    return getattr(_local, "disable_intercept", False)
+    return disable_intercept_var.get()
+
 
 def disable_intercept():
-    _local.disable_intercept = True
+    disable_intercept_var.set(True)
+
 
 def enable_intercept():
-    _local.disable_intercept = False
+    disable_intercept_var.set(False)

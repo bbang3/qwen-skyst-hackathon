@@ -11,7 +11,7 @@ from coinbase_agentkit import (
 )
 from coinbase_agentkit_openai_agents_sdk import get_openai_agents_sdk_tools
 from barrierx_action_provider import barrierx_action_provider
-from tools import make_http_request
+from tools import web_tool
 
 
 def initialize_agent(config: CdpEvmWalletProviderConfig):
@@ -43,7 +43,6 @@ def initialize_agent(config: CdpEvmWalletProviderConfig):
             action_providers=[
                 cdp_api_action_provider(),
                 wallet_action_provider(),
-                barrierx_action_provider(),
             ],
         )
     )
@@ -52,7 +51,7 @@ def initialize_agent(config: CdpEvmWalletProviderConfig):
     tools = get_openai_agents_sdk_tools(agentkit)
 
     # Custom tools
-    # tools.append(make_http_request)
+    tools.append(web_tool)
 
     # Create Agent using the OpenAI Agents SDK
     agent = Agent(
