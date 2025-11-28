@@ -10,7 +10,7 @@ load_dotenv()
 
 
 @function_tool
-# @barrierx
+@barrierx
 def web_tool(
     url: str,
     method: str = "GET",

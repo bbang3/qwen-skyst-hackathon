@@ -1,17 +1,10 @@
-"""Debug utilities for printing tool calls and responses."""
-
 import json
 import re
 
 
 def print_debug_info(output):
-    """Print debugging information about tool calls and responses to terminal.
-
-    Args:
-        output: The RunResult output from Runner.run()
-    """
     print("\n" + "=" * 80)
-    print("🔍 DEBUG: Tool Calls & Responses")
+    print("DEBUG: Tool Calls & Responses")
     print("=" * 80)
 
     tool_calls_info = extract_tool_calls_info(output)
@@ -166,4 +159,3 @@ def extract_tool_calls_info(output) -> list[dict]:
                 tool_calls_info.append(item_dict)
 
     return tool_calls_info
-
