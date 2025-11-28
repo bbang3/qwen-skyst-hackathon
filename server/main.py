@@ -53,7 +53,7 @@ class ProxyRequest(BaseModel):
 
 
 @app.post("/check")
-async def check(request: Request) -> Dict[str, Any]:
+async def check(request: ProxyRequest) -> Dict[str, Any]:
     """Proxy endpoint that safely processes HTTP requests.
 
     This endpoint:
@@ -63,23 +63,22 @@ async def check(request: Request) -> Dict[str, Any]:
     4. Returns the response or error details
     """
     try:
-        data = await request.json()
-
-        # Extract request parameters
-        target_url = data.get("url")
-        method = data.get("method", "GET")
-        headers = data.get("headers")
-        body = data.get("body")
+        target_url = request.url
+        method = request.method
+        headers = request.headers
+        body = request.body
 
         if not target_url:
             raise HTTPException(status_code=400, detail="Missing required field: 'url'")
 
         # Convert all input data to string for security checks
-        input_data_str = str(data)
-        print(f"Request headers: {headers}")
-        print(f"Request body: {body}")
-        print(f"Request method: {method}")
-        print(f"Request target_url: {target_url}")
+        input_data_str = (
+            f"Method: {method}\n"
+            f"URL: {target_url}\n"
+            f"Headers: {headers}\n"
+            f"Body: {body}"
+        )
+        print(f"Input data: {input_data_str}")
 
         # 1. Check input for data leakage
         # Only detect: CRYPTO, CREDIT_CARD, US_SSN, PHONE_NUMBER, US_BANK_NUMBER
