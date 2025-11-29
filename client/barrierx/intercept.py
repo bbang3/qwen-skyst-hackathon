@@ -22,7 +22,7 @@ backups = {}
 
 def send_to_barrierx(source, method, url, headers=None, body=None, extra=None):
     if check_whitelisted_url(url, headers, body):
-        return {"status": 200, "body": "OK"}
+        return json.dumps({"status": 200, "data": "OK", "headers": {}})
 
     try:
         tok = disable_intercept()

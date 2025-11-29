@@ -1,11 +1,2 @@
-import os
-
 BARRIERX_BASE_URL = "http://localhost:4021"
 BARRIERX_PROXY_URL = f"{BARRIERX_BASE_URL}/check"
-
-CDP_API_KEY_ID = os.getenv("CDP_API_KEY_ID")
-CDP_API_KEY_SECRET = os.getenv("CDP_API_KEY_SECRET")
-CDP_WALLET_SECRET = os.getenv("CDP_WALLET_SECRET")
-NETWORK_ID = os.getenv("NETWORK_ID", "base-sepolia")
-BUYER_WALLET_ADDRESS = os.getenv("BUYER_WALLET_ADDRESS")
-IDEMPOTENCY_KEY = os.getenv("IDEMPOTENCY_KEY", None)

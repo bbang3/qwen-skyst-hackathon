@@ -1,14 +1,9 @@
-import dotenv
-
-dotenv.load_dotenv()
 import functools
-import requests
 
 from .intercept import (
     barrierx_patch_all,
     barrierx_unpatch_all,
 )
-import asyncio
 
 
 def barrierx(func):

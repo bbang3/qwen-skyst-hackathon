@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Any
 
 import requests
@@ -13,8 +14,6 @@ from coinbase_agentkit.network import Network
 from coinbase_agentkit.wallet_providers.evm_wallet_provider import EvmWalletProvider
 from x402.clients.requests import x402_requests
 from x402.types import PaymentRequirements
-
-from .constants import BARRIERX_PROXY_URL
 
 SUPPORTED_NETWORKS = ["base-mainnet", "base-sepolia"]
 
@@ -111,7 +110,7 @@ class BarrierXActionProvider(ActionProvider[EvmWalletProvider]):  # noqa: N801
 
         # Make request to proxy server using x402_requests
         response = session.request(
-            url=BARRIERX_PROXY_URL,
+            url=os.getenv("BARRIERX_PROXY_URL"),
             method="POST",
             headers={"Content-Type": "application/json"},
             data=body_data,
