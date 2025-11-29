@@ -21,6 +21,9 @@ backups = {}
 
 
 def send_to_barrierx(source, method, url, headers=None, body=None, extra=None):
+    if check_whitelisted_url(url, headers, body):
+        return {"status": 200, "body": "OK"}
+
     try:
         tok = disable_intercept()
         payload = {
@@ -28,7 +31,7 @@ def send_to_barrierx(source, method, url, headers=None, body=None, extra=None):
             "method": method,
             "url": url,
             "headers": headers or {},
-            "data": body,
+            "body": body,
             "raw": None,
             "extra": extra or {},
         }
@@ -299,3 +302,10 @@ async def intercept_aiohttp_request(self, method, url, **kwargs):
     )
 
     return FakeAiohttpResponse(resp, url)
+
+
+def check_whitelisted_url(url, headers, body) -> bool:
+    whitelisted_urls = [
+        "https://api.openai.com/v1/traces/ingest",
+    ]
+    return url in whitelisted_urls

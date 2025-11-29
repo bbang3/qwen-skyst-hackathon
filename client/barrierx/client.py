@@ -11,19 +11,6 @@ from .intercept import (
 import asyncio
 
 
-def barrierx_async(func):
-
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
-        barrierx_patch_all()
-        try:
-            return await asyncio.to_thread(func, *args, **kwargs)
-        finally:
-            barrierx_unpatch_all()
-
-    return wrapper
-
-
 def barrierx(func):
 
     @functools.wraps(func)

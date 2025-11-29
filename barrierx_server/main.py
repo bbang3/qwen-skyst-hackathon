@@ -3,12 +3,16 @@ from typing import Any, Dict
 
 import requests
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from x402.fastapi.middleware import require_payment
 
 from data_leakage_detector import check_data_leakage
 from prompt_injection_detector import check_prompt_injection
+
+import warnings
+
+warnings.filterwarnings("ignore")
 
 # Load environment variables
 load_dotenv()
@@ -38,7 +42,7 @@ class ProxyRequest(BaseModel):
     url: str
     method: str = "GET"
     headers: Dict[str, str] | None = None
-    body: Any | None = None
+    body: str | None = None
     payment_info: Dict[str, Any] | None = None
 
 
@@ -68,7 +72,7 @@ async def check(request: ProxyRequest) -> Dict[str, Any]:
             f"Headers: {headers}\n"
             f"Body: {body}"
         )
-        print(f"Input data: {input_data_str}")
+        print(input_data_str)
 
         # 1. Check input for data leakage
         # Only detect: CRYPTO, CREDIT_CARD, US_SSN, PHONE_NUMBER, US_BANK_NUMBER

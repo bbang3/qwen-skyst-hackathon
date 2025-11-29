@@ -8,8 +8,6 @@ with external APIs through our firewall proxy that protects against:
 """
 
 import asyncio
-import sys
-from pathlib import Path
 
 import streamlit as st
 from agents.items import ItemHelpers
@@ -17,12 +15,7 @@ from agents.run import Runner
 from dotenv import load_dotenv
 from setup import setup
 
-# Add parent directory to path to import chatbot module
-current_dir = Path(__file__).parent
-parent_dir = current_dir.parent
-sys.path.insert(0, str(parent_dir))
-
-from client.debug_utils import print_debug_info
+from debug_utils import print_debug_info
 
 # Load environment variables
 load_dotenv()
