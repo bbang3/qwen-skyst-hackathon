@@ -10,7 +10,7 @@ from coinbase_agentkit import (
     wallet_action_provider,
 )
 from coinbase_agentkit_openai_agents_sdk import get_openai_agents_sdk_tools
-from tools import web_tool
+from tools import web_tool, web_search
 
 
 def initialize_agent(config: CdpEvmWalletProviderConfig):
@@ -51,6 +51,7 @@ def initialize_agent(config: CdpEvmWalletProviderConfig):
 
     # Custom tools
     tools.append(web_tool)
+    # tools.append(web_search)
 
     # Create Agent using the OpenAI Agents SDK
     agent = Agent(
