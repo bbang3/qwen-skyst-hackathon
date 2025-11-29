@@ -83,7 +83,7 @@ A prompt injection is an attempt to manipulate an AI system by:
             result_text = response.choices[0].message.content.strip()
             result = json.loads(result_text)
             is_injection = result.get("is_prompt_injection", False)
-            reason = result.get("reason", "Prompt injection detected by LLM classifier")
+            reason = result.get("reason")
 
             if is_injection:
                 return False, f"Prompt injection detected: {reason}"

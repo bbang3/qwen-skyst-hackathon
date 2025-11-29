@@ -69,7 +69,7 @@ class DataLeakageDetector:
 
         for pattern, description in sensitive_patterns:
             if re.search(pattern, data, re.IGNORECASE):
-                return False, f"Data leakage detected: {description}"
+                return False, f"Sensitive pattern detected: {description}"
 
         return True, ""
 
@@ -107,12 +107,15 @@ class DataLeakageDetector:
                 # Get unique entity types found
                 entity_types = set(result.entity_type for result in results)
                 entity_list = ", ".join(sorted(entity_types))
-                return False, f"PII detected by Presidio Analyzer: {entity_list}"
+                return (
+                    False,
+                    f"PII entities found: {entity_list}",
+                )
 
             return True, ""
         except Exception as e:
             # If Presidio fails, log but don't block (fallback to regex only)
-            print(f"Warning: Presidio Analyzer error: {e}")
+            print(f"Warning: Data leakage detector error: {e}")
             return True, ""
 
 
