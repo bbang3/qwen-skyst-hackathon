@@ -8,9 +8,10 @@ from coinbase_agentkit import (
     CdpEvmWalletProviderConfig,
     cdp_api_action_provider,
     wallet_action_provider,
+    erc20_action_provider,
 )
 from coinbase_agentkit_openai_agents_sdk import get_openai_agents_sdk_tools
-from tools import web_tool, web_search
+from tools import web_tool
 
 
 def initialize_agent(config: CdpEvmWalletProviderConfig):
@@ -42,6 +43,8 @@ def initialize_agent(config: CdpEvmWalletProviderConfig):
             action_providers=[
                 cdp_api_action_provider(),
                 wallet_action_provider(),
+                erc20_action_provider(),
+                # weth_action_provider(),
             ],
         )
     )
